@@ -15,7 +15,7 @@ class BL {
       const { data } = await post('getOrderStatusList');
       return data;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
 
@@ -35,7 +35,7 @@ class BL {
       const { orders } = await BL.getOrdersByStatus(status.id);
       return orders;
     } catch (err) {
-      return err;
+      throw err;
     }
   }
 }
