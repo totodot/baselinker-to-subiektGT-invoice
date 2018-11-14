@@ -1,4 +1,4 @@
-require("winax");
+require('winax');
 
 class SubiektGT {
   constructor(config) {
@@ -9,14 +9,9 @@ class SubiektGT {
   connect() {
     try {
       const {
-        user,
-        pass,
-        server,
-        dbName,
-        operator,
-        operatorPass
+        user, pass, server, dbName, operator, operatorPass,
       } = this.config;
-      const gt = new ActiveXObject("InsERT.GT");
+      const gt = new ActiveXObject('InsERT.GT');
       // gt.Autentykacja = 0;
       // gt.Produkt = InsERT.gtaProduktSubiekt
       gt.Uzytkownik = user;

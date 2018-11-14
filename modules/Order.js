@@ -1,4 +1,5 @@
 const { getProducts, getProductsPrice } = require('../utils/orderUtils');
+const Customer = require('./Customer');
 
 class Order {
   constructor(order) {
@@ -10,7 +11,8 @@ class Order {
   }
 
   createZK(subiekt) {
-    console.log(this.order);
+    const customer = new Customer(this.order, subiekt);
+    customer.add();
   }
 }
 
