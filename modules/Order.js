@@ -12,7 +12,14 @@ class Order {
 
   createZK(subiekt) {
     const customer = new Customer(this.order, subiekt);
-    customer.add();
+    if (!customer.customerGT) {
+      const customerId = customer.add();
+      if (customerId) {
+        console.log('OK', customerId);
+      } else {
+        console.log('NOT OK');
+      }
+    }
   }
 }
 
