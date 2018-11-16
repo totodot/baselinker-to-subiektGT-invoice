@@ -6,7 +6,7 @@ class Customer {
     this.subiekt = subiekt;
     this.customer = customer;
 
-    this.customerGT = null;
+    this.customerGt = null;
 
     this.nip = customer.invoice_nip.replace(/ /g, '');
     this.isCompany = customer.invoice_company !== '' && this.nip !== '';
@@ -18,7 +18,7 @@ class Customer {
 
   readCustomer(nip) {
     if (this.subiekt.Kontrahenci.Istnieje(nip)) {
-      this.customerGT = this.subiekt.Kontrahenci.Wczytaj(nip);
+      this.customerGt = this.subiekt.Kontrahenci.Wczytaj(nip);
       return true;
     }
     return false;
@@ -60,6 +60,7 @@ class Customer {
         throw new Error('Nie można utworzyć klienta brak jego nazwy!');
       }
       const [firstName, ...secondNames] = invoice_fullname.split(' ');
+      this.customerGt.Nazwa = invoice_fullname;
       this.customerGt.NazwaPelna = `${invoice_company} ${invoice_fullname}`;
       this.customerGt.OsobaImie = firstName;
       this.customerGt.OsobaNazwisko = secondNames.join(' ');
@@ -86,17 +87,15 @@ class Customer {
 
   add() {
     try {
-      if (this.customerGT) {
-        throw new Error('Nie można dodać klienta dla tego obiektu, klient już istieje!');
+      if (this.customerGt) {
+        throw new Error('Nie można dodać klienta dla tego obiektu, klient już istnieje!');
       }
       this.customerGt = this.subiekt.Kontrahenci.Dodaj();
       this.setGTObject();
       console.log(`Tworzenie klienta ${this.customerGt.Email}`);
-      // TODO comment
-      // this.customerGt.Zapisz();
-      // console.log(`Utworzono klienta: ${this.customerGt.Symbol}`);
-      // return this.customerGt.Identyfikator;
-      return true;
+      this.customerGt.Zapisz();
+      console.log(`Utworzono klienta: ${this.customerGt.Symbol}`);
+      return this.customerGt.Symbol;
     } catch (err) {
       console.log(err);
       return false;

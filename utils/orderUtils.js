@@ -1,8 +1,8 @@
 const separator = ',';
 const quantitySeparator = ' x';
 
-const reduceSku = (product) => {
-  const skuParts = product.sku.split(separator);
+const reduceSku = (sku) => {
+  const skuParts = sku.split(separator);
   return skuParts.reduce((prev, next) => {
     const productsQuantities = {
       ...prev,
@@ -17,9 +17,9 @@ const reduceSku = (product) => {
       return productsQuantities;
     }
     if (productsQuantities[SKU]) {
-      productsQuantities[SKU] += QTN * product.quantity;
+      productsQuantities[SKU] += QTN;
     } else {
-      productsQuantities[SKU] = QTN * product.quantity;
+      productsQuantities[SKU] = QTN;
     }
     return productsQuantities;
   }, {});
@@ -33,7 +33,7 @@ const getProducts = (products) => {
     if (!next.sku || next.sku === '') {
       throw new Error(`Not SKU for product ${next.name}`);
     }
-    const skuProducts = reduceSku(next);
+    const skuProducts = reduceSku(next.sku);
 
     Object.entries(skuProducts).forEach(([SKU, QTN]) => {
       if (productsQuantities[SKU]) {
@@ -49,4 +49,4 @@ const getProducts = (products) => {
 
 const getProductsPrice = products => products.reduce((prev, next) => prev + next.price_brutto * next.quantity, 0);
 
-module.exports = { getProducts, getProductsPrice };
+module.exports = { getProducts, getProductsPrice, reduceSku };
