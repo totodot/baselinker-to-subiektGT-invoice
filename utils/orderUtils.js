@@ -1,5 +1,6 @@
 const separator = ',';
 const quantitySeparator = ' x';
+const quantityRegex = new RegExp(`${quantitySeparator}(\\d+)`);
 
 const reduceSku = (sku) => {
   const skuParts = sku.split(separator);
@@ -7,8 +8,15 @@ const reduceSku = (sku) => {
     const productsQuantities = {
       ...prev,
     };
-    const [sku, qtn = 1] = next.trim().split(quantitySeparator);
-    const SKU = sku.trim();
+    const splited = next
+      .trim()
+      .split(quantityRegex)
+      .filter(a => a !== '');
+    let qtn = 1;
+    if (splited.length > 1) {
+      qtn = splited.pop();
+    }
+    const SKU = splited.join(quantitySeparator).trim();
     const QTN = Number(qtn);
     if (!Number.isInteger(QTN) || QTN === '') {
       throw new Error(`Incorect SKU: ${next.trim()}`);
