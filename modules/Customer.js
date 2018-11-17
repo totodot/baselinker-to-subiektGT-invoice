@@ -1,3 +1,4 @@
+const colors = require('colors');
 const { getProducts, getProductsPrice } = require('../utils/orderUtils');
 const { nipIsValid, removeSeparator } = require('../utils/nip');
 
@@ -18,6 +19,8 @@ class Customer {
 
   readCustomer(nip) {
     if (this.subiekt.Kontrahenci.Istnieje(nip)) {
+      console.log('Klient istnieje w bazie danych'.yellow);
+      console.log(`NIP: ${this.nip}`.yellow);
       this.customerGt = this.subiekt.Kontrahenci.Wczytaj(nip);
       return true;
     }
@@ -60,21 +63,27 @@ class Customer {
         throw new Error('Nie można utworzyć klienta brak jego nazwy!');
       }
       const [firstName, ...secondNames] = invoice_fullname.split(' ');
-      this.customerGt.Nazwa = invoice_fullname;
-      this.customerGt.NazwaPelna = `${invoice_company} ${invoice_fullname}`;
+      this.customerGt.NazwaPelna = `${invoice_company} ${invoice_fullname}`.trim();
+      this.customerGt.Osoba = 1;
       this.customerGt.OsobaImie = firstName;
       this.customerGt.OsobaNazwisko = secondNames.join(' ');
-      this.customerGt.Osoba = 1;
     }
 
     const addressParts = invoice_address.split(' ');
     const addressNumber = addressParts.pop();
 
+    this.customerGt.GrupaId = 3;
     this.customerGt.Email = email;
-    this.customerGt.Miejscowosc = invoice_city;
+    this.customerGt.Miejscowosc = invoice_city.replace(/,/g, '');
     this.customerGt.KodPocztowy = invoice_postcode;
-    this.customerGt.Ulica = addressParts.join(' ');
-    this.customerGt.NrDomu = addressNumber;
+    this.customerGt.Ulica = addressParts.join(' ').replace(/,/g, '');
+
+    const [nr1, nr2] = addressNumber.split('/');
+
+    this.customerGt.NrDomu = nr1;
+    if (nr2) {
+      this.customerGt.NrLokalu = nr2;
+    }
 
     if (phone) {
       const phoneGt = this.customerGt.Telefony.Dodaj(phone);
@@ -88,17 +97,20 @@ class Customer {
   add() {
     try {
       if (this.customerGt) {
-        throw new Error('Nie można dodać klienta dla tego obiektu, klient już istnieje!');
+        console.log('Nie można dodać klienta dla tego obiektu, klient już istnieje!'.yellow);
+        return this.customerGt.symbol;
       }
       this.customerGt = this.subiekt.Kontrahenci.Dodaj();
       this.setGTObject();
-      console.log(`Tworzenie klienta ${this.customerGt.Email}`);
+      console.log(`Tworzenie klienta ${this.customerGt.Email}`.yellow);
       this.customerGt.Zapisz();
-      console.log(`Utworzono klienta: ${this.customerGt.Symbol}`);
+      console.log(`Utworzono klienta: ${this.customerGt.Symbol}`.green);
       return this.customerGt.Symbol;
     } catch (err) {
-      console.log(err);
-      return false;
+      if (err.description) {
+        throw new Error(`SUBIEKT_GT_ERROR_: ${err.description}`);
+      }
+      throw err;
     }
   }
 }

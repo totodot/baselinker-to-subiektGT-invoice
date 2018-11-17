@@ -14,7 +14,7 @@ class OrderItem {
 
   getMnoznik() {
     const cost = this.productsGt
-      .map(productGt => (productGt.getPriceGt(), productGt.getQuantity))
+      .map(productGt => [productGt.getPriceGt(), productGt.getQuantity()])
       .reduce((prev, [price, quantity]) => prev + price * quantity, 0);
 
     return this.price / cost;
@@ -27,9 +27,7 @@ class OrderItem {
     }
     this.products = reduceSku(sku);
     const productsEntries = Object.entries(this.products);
-    this.productsGt = productsEntries.map(
-      ([SKU, QNT]) => new Product(SKU, QNT, name, this.subiekt),
-    );
+    this.productsGt = productsEntries.map(([SKU, QNT]) => new Product(SKU, QNT, this.subiekt));
 
     if (this.productsGt.length === 1) {
       const product = this.productsGt[0];

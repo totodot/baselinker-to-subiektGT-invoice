@@ -2,7 +2,6 @@ const Order = require('./modules/Order');
 const { statusName, subiektGT: subiektGTConfig } = require('./config');
 const BL = require('./modules/baselinker');
 const SubiektGT = require('./modules/SubiektGT');
-const File = require('./utils/File');
 
 const GT = new SubiektGT(subiektGTConfig);
 const subiekt = GT.connect();
@@ -16,20 +15,18 @@ const getOrders = async () => {
   }
 };
 
-const f = new File();
-f.read().then(() => {
-  global.GtFile = f;
-
-  getOrders()
-    .then((orders) => {
-      const a = new Order(orders[1], subiekt);
-      a.createZK();
-      // orders.forEach((order) => {
-      //   const a = new Order(order);
-      //   a.createZK(subiekt);
-      // });
-    })
-    .catch((err) => {
-      console.log(err);
+getOrders()
+  .then((orders) => {
+    // const a = new Order(orders[1], subiekt);
+    // a.createZK();
+    const len = orders.length;
+    orders.forEach((order, index) => {
+      console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'.rainbow, `${index + 1}/${len}`);
+      const a = new Order(order, subiekt);
+      a.createZK(subiekt);
+      console.log('\n');
     });
-});
+  })
+  .catch((err) => {
+    console.log(err);
+  });
