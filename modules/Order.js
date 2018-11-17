@@ -35,7 +35,12 @@ class Order {
     if (products.length === 0) {
       throw new Error('Zamówienie nie posiada produktów');
     }
-    this.products = products.map(product => new OrderItem(product, this.subiekt));
+    this.products = products.map((product) => {
+      const orderItem = new OrderItem(product, this.subiekt);
+      return orderItem.getProducts();
+    });
+
+    console.log(this.products.length);
   }
 }
 

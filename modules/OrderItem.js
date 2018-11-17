@@ -5,32 +5,47 @@ const Product = require('./Product');
 class OrderItem {
   constructor(item, subiekt) {
     this.item = item;
+    this.price = item.price_brutto;
+    this.quantity = item.quantity;
     this.subiekt = subiekt;
     this.productsGt = [];
-    this.getProducts();
+    this.setProducts();
   }
 
-  getProducts() {
-    const {
-      sku, name, quantity, price_brutto,
-    } = this.item;
+  getMnoznik() {
+    const cost = this.productsGt
+      .map(productGt => (productGt.getPriceGt(), productGt.getQuantity))
+      .reduce((prev, [price, quantity]) => prev + price * quantity, 0);
+
+    return this.price / cost;
+  }
+
+  setProducts() {
+    const { sku, name } = this.item;
     if (sku === '') {
       throw new Error(`Element zamówienia ${name}: nie posiada SKU!!!`);
     }
     this.products = reduceSku(sku);
     const productsEntries = Object.entries(this.products);
-    if (productsEntries.length === 1) {
-      const [SKU, QNT] = productsEntries[0];
-      const product = new Product(SKU, name, this.subiekt);
-      product.quantity = QNT * quantity;
-      product.price = price_brutto / QNT;
-      this.productsGt.push(product);
+    this.productsGt = productsEntries.map(
+      ([SKU, QNT]) => new Product(SKU, QNT, name, this.subiekt),
+    );
+
+    if (this.productsGt.length === 1) {
+      const product = this.productsGt[0];
+      const quantity = product.quantity;
+      const price = this.price;
+      product.setPrice(price / quantity);
     } else {
-      // this.productsGt = productsEntries.map(product => )
-      // const a = productsEntries.map(product => [...product,])
-      // console.log(productsEntries);
-      // console.log(price_brutto);
+      const mnoznik = this.getMnoznik();
+      this.productsGt.forEach((productGt) => {
+        productGt.setPrice(productGt.getPriceGt() * mnoznik);
+      });
     }
+  }
+
+  getProducts() {
+    return this.productsGt;
   }
 }
 

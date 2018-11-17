@@ -1,8 +1,10 @@
 class Product {
-  constructor(sku, name, subiekt) {
+  constructor(sku, qnt, name, subiekt) {
     this.subiekt = subiekt;
     this.name = name;
     this.sku = sku;
+    this.price = 0;
+    this.quantity = qnt;
     this.ProductGt = null;
 
     this.checkExist();
@@ -15,14 +17,26 @@ class Product {
     }
     if (this.subiekt.Towary.Istnieje(sku)) {
       this.productGt = this.subiekt.Towary.Wczytaj(sku);
-      console.log(this.productGt.Nazwa);
+      this.priceGt = this.productGt.Ceny.Element(1).Brutto;
     } else {
       throw new Error(`Kod sku: ${sku} nie istnieje w systemie!!!`);
     }
   }
 
-  getPrice() {
-    return this.productGt.Ceny.Element(1).Brutto;
+  getPriceGt() {
+    return this.priceGt;
+  }
+
+  setPrice(price) {
+    this.price = price;
+  }
+
+  setQuantity(quantity) {
+    this.quantity = quantity;
+  }
+
+  getQuantity() {
+    return this.quantity;
   }
 }
 
