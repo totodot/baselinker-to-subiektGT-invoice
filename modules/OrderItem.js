@@ -37,13 +37,21 @@ class OrderItem {
     } else {
       const mnoznik = this.getMnoznik();
       this.productsGt.forEach((productGt) => {
-        productGt.setPrice(productGt.getPriceGt() * mnoznik);
+        productGt.setPrice(productGt.getPriceGt() * mnoznik.toFixed(2) * 1);
       });
+
+      this.updateQuantity();
     }
   }
 
   getProducts() {
     return this.productsGt;
+  }
+
+  updateQuantity() {
+    this.productsGt.forEach((product) => {
+      product.quantity *= this.quantity;
+    });
   }
 }
 
