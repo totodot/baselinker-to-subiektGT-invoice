@@ -1,8 +1,10 @@
+const BigNumber = require('bignumber.js');
+
 class Product {
   constructor(sku, qnt, subiekt) {
     this.subiekt = subiekt;
     this.sku = sku;
-    this.price = 0;
+    this.price = new BigNumber(0);
     this.quantity = qnt;
     this.ProductGt = null;
 
@@ -16,7 +18,7 @@ class Product {
     }
     if (this.subiekt.Towary.Istnieje(sku)) {
       this.productGt = this.subiekt.Towary.Wczytaj(sku);
-      this.priceGt = this.productGt.Ceny.Element(1).Brutto;
+      this.priceGt = new BigNumber(this.productGt.Ceny.Element(1).Brutto);
       this.name = this.productGt.Nazwa;
     } else {
       throw new Error(`Kod sku: ${sku} nie istnieje w systemie!!!`);
@@ -24,11 +26,15 @@ class Product {
   }
 
   getPriceGt() {
-    return this.priceGt;
+    return this.priceGt.toNumber();
   }
 
   setPrice(price) {
-    this.price = price;
+    this.price = new BigNumber(price);
+  }
+
+  getPrice() {
+    return this.price.toNumber();
   }
 
   setQuantity(quantity) {

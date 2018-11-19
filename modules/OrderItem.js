@@ -1,11 +1,11 @@
 const { reduceSku } = require('../utils/orderUtils');
-
+const BigNumber = require('bignumber.js');
 const Product = require('./Product');
 
 class OrderItem {
   constructor(item, subiekt) {
     this.item = item;
-    this.price = item.price_brutto;
+    this.price = new BigNumber(item.price_brutto);
     this.quantity = item.quantity;
     this.subiekt = subiekt;
     this.productsGt = [];
