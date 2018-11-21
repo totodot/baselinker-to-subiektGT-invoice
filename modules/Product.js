@@ -30,7 +30,7 @@ class Product {
   }
 
   setPrice(price) {
-    this.price = new BigNumber(price);
+    this.price = new BigNumber(price.toFixed(2));
   }
 
   getPrice() {
@@ -43,6 +43,10 @@ class Product {
 
   getQuantity() {
     return this.quantity;
+  }
+
+  getCost() {
+    return this.price.times(this.quantity).toNumber();
   }
 }
 

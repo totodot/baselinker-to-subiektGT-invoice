@@ -1,8 +1,5 @@
 const BigNumber = require('bignumber.js');
 
-function strip(number) {
-  return parseFloat(number).toPrecision(12);
-}
 const cost = new BigNumber(13.76);
 const products = [
   {
@@ -15,22 +12,8 @@ const products = [
   },
 ];
 
-// const mapProducts = products.map(product => ({
-//   obj: product,
-//   price: new BigNumber(product.price),
-//   quantity: product.quantity,
-// }));
-
 const getTotalPrice = () => products.reduce((prev, next) => prev.plus(next.price.times(next.quantity)), new BigNumber(0));
 
-console.log(products[0].price.toNumber(), products[0].quantity);
-console.log(products[1].price.toNumber(), products[1].quantity);
-console.log(
-  cost
-    .minus(getTotalPrice())
-    .times(100)
-    .toNumber(),
-);
 let change = true;
 
 while (change) {
@@ -60,7 +43,3 @@ while (change) {
     }
   });
 }
-
-console.log(products[0].price.toNumber(), products[0].quantity);
-console.log(products[1].price.toNumber(), products[1].quantity);
-console.log(getTotalPrice().toNumber());

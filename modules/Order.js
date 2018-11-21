@@ -11,13 +11,30 @@ class Order {
     this.order = order;
     this.customer = null;
     this.products = [];
+    this.orderPrice = Number(
+      this.order.products
+        .reduce(
+          (price, next) => price + next.price_brutto * next.quantity,
+          this.order.delivery_price,
+        )
+        .toFixed(2),
+    );
   }
 
   addProduct(product) {
-    const { sku, quantity, price } = product;
+    const { sku } = product;
     const position = this.orderGt.Pozycje.Dodaj(sku);
-    position.IloscJm = quantity;
-    position.WartoscBruttoPoRabacie = price * quantity;
+    position.IloscJm = product.getQuantity();
+    position.WartoscBruttoPoRabacie = product.getCost();
+    return position;
+  }
+
+  addTransport() {
+    const position = this.orderGt.Pozycje.DodajUslugeJednorazowa();
+    position.UslJednNazwa = 'Usługa logistyczna';
+    position.WartoscBruttoPoRabacie = Number((this.orderPrice - this.productsPrice).toFixed(2));
+    position.IloscJm = 1;
+    position.Jm = 'szt.';
     return position;
   }
 
@@ -29,6 +46,7 @@ class Order {
       this.products.forEach((product) => {
         this.addProduct(product);
       });
+      this.addTransport();
       this.orderGt.Zapisz();
     } catch (err) {
       if (err.description) {
@@ -61,6 +79,12 @@ class Order {
       const orderItem = new OrderItem(product, this.subiekt);
       return [...prev, ...orderItem.getProducts()];
     }, []);
+
+    this.productsPrice = Number(
+      this.products
+        .reduce((price, next) => price + next.getPrice() * next.getQuantity(), 0)
+        .toFixed(2),
+    );
 
     console.log(`Zamówienie: produktów: ${this.products.length}`);
   }
