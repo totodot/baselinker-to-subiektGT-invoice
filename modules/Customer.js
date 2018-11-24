@@ -1,81 +1,53 @@
-const colors = require('colors');
-const { getProducts, getProductsPrice } = require('../utils/orderUtils');
-const { nipIsValid, removeSeparator } = require('../utils/nip');
+const GT = require('./SubiektGT');
+const mapping = require('../mapping/baselinkerMap');
+const Logger = require('../utils/loggerUtil');
+const { nipIsValid, removeSeparator } = require('../utils/nipUtil');
 
 class Customer {
-  constructor(customer, subiekt) {
-    this.subiekt = subiekt;
-    this.customer = customer;
-
+  constructor(order) {
+    this.customer = mapping(order).customer;
     this.customerGt = null;
-
-    this.nip = customer.invoice_nip.replace(/ /g, '');
-    this.isCompany = customer.invoice_company !== '' && this.nip !== '';
-
-    if (this.isCompany) {
-      this.checkExist();
-    }
-  }
-
-  readCustomer(nip) {
-    if (this.subiekt.Kontrahenci.Istnieje(nip)) {
-      console.log('Klient istnieje w bazie danych'.yellow);
-      console.log(`NIP: ${this.nip}`.yellow);
-      this.customerGt = this.subiekt.Kontrahenci.Wczytaj(nip);
-      return true;
-    }
-    return false;
-  }
-
-  checkExist() {
-    if (this.readCustomer(this.nip)) {
-      return;
-    }
-    this.nip = removeSeparator(this.nip);
-    this.readCustomer(this.nip);
-  }
-
-  setGTObject() {
-    const {
-      phone,
-      email,
-      invoice_fullname,
-      invoice_company,
-      invoice_address,
-      invoice_city,
-      invoice_postcode,
-    } = this.customer;
+    this.nip = removeSeparator(this.customer.invoiceNip);
+    this.isCompany = this.customer.invoiceCompany !== '' && this.nip !== '';
 
     if (this.isCompany) {
-      if (invoice_company.length === 0) {
-        throw new Error('Nie można utworzyć klienta brak jego nazwy!');
+      this.customerGt = this.checkExist();
+    }
+  }
+
+  // Set Subiekt GT object
+
+  setCustomerName(company, fullName) {
+    if (this.isCompany) {
+      if (company.length === 0) {
+        throw new Error(Logger('customerNoName'));
       }
       if (!nipIsValid(this.nip)) {
-        throw new Error('Nie można utworzyć klineta, zły NIP');
+        throw new Error(Logger('customerInvalidNIP'));
       }
-      this.customerGt.NazwaPelna = `${invoice_company} ${invoice_fullname}`;
-      this.customerGt.Nazwa = invoice_company.slice(0, 40);
+      this.customerGt.NazwaPelna = `${company} ${fullName}`;
+      this.customerGt.Nazwa = company.slice(0, 40);
       this.customerGt.Osoba = 0;
       this.customerGt.NIP = this.nip;
       this.customerGt.Symbol = this.nip;
     } else {
-      if (invoice_fullname.length === 0) {
-        throw new Error('Nie można utworzyć klienta brak jego nazwy!');
+      if (fullName.length === 0) {
+        throw new Error(Logger('customerNoName'));
       }
-      const [firstName, ...secondNames] = invoice_fullname.split(' ');
-      this.customerGt.NazwaPelna = `${invoice_company} ${invoice_fullname}`.trim();
+      const [firstName, ...secondNames] = fullName.split(' ');
+      this.customerGt.NazwaPelna = `${company} ${fullName}`.trim();
       this.customerGt.Osoba = 1;
       this.customerGt.OsobaImie = firstName;
       this.customerGt.OsobaNazwisko = secondNames.join(' ');
     }
+  }
 
-    const addressParts = invoice_address.split(' ');
+  setCustomerAddress(address, city, postcode) {
+    const addressParts = address.split(' ');
     const addressNumber = addressParts.pop();
 
-    this.customerGt.GrupaId = 3;
-    this.customerGt.Email = email;
-    this.customerGt.Miejscowosc = invoice_city.replace(/,/g, '');
-    this.customerGt.KodPocztowy = invoice_postcode;
+    this.customerGt.Miejscowosc = city.replace(/,/g, '');
+    this.customerGt.KodPocztowy = postcode;
     this.customerGt.Ulica = addressParts.join(' ').replace(/,/g, '');
 
     const [nr1, nr2] = addressNumber.split('/');
@@ -84,27 +56,58 @@ class Customer {
     if (nr2) {
       this.customerGt.NrLokalu = nr2;
     }
+  }
 
+  setCustomerContact(email, phone) {
+    this.customerGt.Email = email;
     if (phone) {
       const phoneGt = this.customerGt.Telefony.Dodaj(phone);
       phoneGt.Nazwa = 'Primary';
       phoneGt.Numer = phone;
       phoneGt.Typ = 3;
     }
+  }
+
+  setGTObject() {
+    const {
+      email,
+      invoiceAddress,
+      invoiceCity,
+      invoiceCompany,
+      invoiceFullname,
+      invoicePostcode,
+      phone,
+    } = this.customer;
+
+    this.setCustomerName(invoiceCompany, invoiceFullname);
+    this.setCustomerAddress(invoiceAddress, invoiceCity, invoicePostcode);
+    this.setCustomerContact(email, phone);
+
+    // TODO add to config
+    this.customerGt.GrupaId = 3;
+
     return true;
+  }
+
+  checkExist() {
+    if (GT.instance.Kontrahenci.Istnieje(this.nip)) {
+      Logger.info('customerExist', { nip: this.nip });
+      return GT.instance.Kontrahenci.Wczytaj(this.nip);
+    }
+    return null;
   }
 
   add() {
     try {
       if (this.customerGt) {
-        console.log('Nie można dodać klienta dla tego obiektu, klient już istnieje!'.yellow);
+        Logger.info('customerCanNotAdd');
         return this.customerGt.symbol;
       }
-      this.customerGt = this.subiekt.Kontrahenci.Dodaj();
+      this.customerGt = GT.instance.Kontrahenci.Dodaj();
       this.setGTObject();
-      console.log(`Tworzenie klienta ${this.customerGt.Email}`.yellow);
+      Logger.info('customerCreate', { email: this.customerGt.email });
       this.customerGt.Zapisz();
-      console.log(`Utworzono klienta: ${this.customerGt.Symbol}`.green);
+      Logger.success('customerCreated', { symbol: this.customerGt.symbol });
       return this.customerGt.Symbol;
     } catch (err) {
       if (err.description) {

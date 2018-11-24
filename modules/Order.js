@@ -63,8 +63,8 @@ class Order {
       if (!this.customer.customerGt) {
         this.customer.add();
       }
-      this.create();
-      console.log('Zamówienie stworzono pomyślnie!!!'.green);
+      // this.create();
+      // console.log('Zamówienie stworzono pomyślnie!!!'.green);
     } catch (err) {
       console.log(`${err.message}`.red);
     }

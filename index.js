@@ -2,6 +2,7 @@ const Order = require('./modules/Order');
 const { statusName, subiektGT: subiektGTConfig } = require('./config');
 const BL = require('./modules/baselinker');
 const SubiektGT = require('./modules/SubiektGT');
+const Customer = require('./modules/Customer');
 
 const GT = new SubiektGT(subiektGTConfig);
 const subiekt = GT.connect();
@@ -21,8 +22,9 @@ getOrders()
     // a.createZK();
     const len = orders.length;
 
-    [orders[0]].forEach((order, index) => {
+    [orders[1]].forEach((order, index) => {
       console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'.rainbow, `${index + 1}/${len}`);
+      // console.log(order);
       const a = new Order(order, subiekt);
       a.createZK(subiekt);
       // console.log('\n');

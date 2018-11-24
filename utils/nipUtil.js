@@ -12,7 +12,7 @@ const nipIsValid = (nip) => {
   return false;
 };
 
-const removeSeparator = nip => nip.replace(/-/g, '');
+const removeSeparator = nip => nip.replace(/-/g, '').replace(/ /g, '');
 
 module.exports = {
   nipIsValid,
