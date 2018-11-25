@@ -1,4 +1,3 @@
-const BigNumber = require('bignumber.js');
 const Logger = require('../utils/loggerUtil');
 const { reduceSku } = require('../utils/orderUtils');
 const Product = require('./Product');
@@ -21,8 +20,6 @@ class OrderItem {
     }
     const products = Object.entries(reduceSku(symbol));
 
-    // this.products = productsEntries.map(([SKU, QNT]) => new Product(SKU, QNT, this.subiekt));
-
     if (products.length === 1) {
       const [productSymbol, productQuantity] = products[0];
       this.item = new Product(productSymbol, productQuantity);
@@ -32,15 +29,15 @@ class OrderItem {
     }
   }
 
-  // getProducts() {
-  //   return this.products;
-  // }
-
-  // updateQuantity() {
-  //   this.products.forEach((product) => {
-  //     product.quantity *= this.quantity;
-  //   });
-  // }
+  getProducts() {
+    const { item, quantity } = this;
+    const className = item.getClassName();
+    const products = className === 'Combo' ? item.getProducts() : [item.getProduct()];
+    return products.map(product => ({
+      ...product,
+      quantity: product.quantity * quantity,
+    }));
+  }
 }
 
 module.exports = OrderItem;

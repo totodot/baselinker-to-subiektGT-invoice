@@ -2,6 +2,7 @@ const Product = require('./Product');
 
 class Combo {
   constructor(items, price) {
+    this.className = 'Combo';
     this.items = items;
     this.price = price;
     this.products = [];
@@ -57,6 +58,14 @@ class Combo {
         }
       });
     }
+  }
+
+  getProducts() {
+    return this.products.map(product => product.getProduct());
+  }
+
+  getClassName() {
+    return this.className;
   }
 }
 

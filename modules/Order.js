@@ -83,8 +83,9 @@ class Order {
         price: product.price_brutto,
         quantity: product.quantity,
       });
-      // return [...prev, ...orderItem.getProducts()];
+      return [...prev, ...orderItem.getProducts()];
     }, []);
+    console.log(this.products);
 
     // this.productsPrice = Number(
     //   this.products

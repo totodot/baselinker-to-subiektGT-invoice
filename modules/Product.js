@@ -1,7 +1,9 @@
 const GT = require('./SubiektGT');
+const Logger = require('../utils/loggerUtil');
 
 class Product {
   constructor(symbol, quantity, price = 0) {
+    this.className = 'Product';
     this.symbol = symbol;
     this.price = price;
     this.priceGt = null;
@@ -14,14 +16,14 @@ class Product {
   checkExist() {
     const { symbol } = this;
     if (!symbol) {
-      throw new Error('Towar - nie posiada kodu symbol!!!');
+      throw new Error(Logger.translate('productNoSymbol'));
     }
     if (GT.instance.Towary.Istnieje(symbol)) {
       this.productGt = GT.instance.Towary.Wczytaj(symbol);
       this.priceGt = Number(this.productGt.Ceny.Element(1).Brutto);
       this.name = this.productGt.Nazwa;
     } else {
-      throw new Error(`Kod symbol: ${symbol} nie istnieje w systemie!!!`);
+      throw new Error(Logger.translate('productNoExist', { symbol }));
     }
   }
 
@@ -51,6 +53,19 @@ class Product {
 
   getCost() {
     return Number((this.price * this.quantity).toFixed(2));
+  }
+
+  getProduct() {
+    const { symbol, price, quantity } = this;
+    return {
+      symbol,
+      price,
+      quantity,
+    };
+  }
+
+  getClassName() {
+    return this.className;
   }
 }
 
