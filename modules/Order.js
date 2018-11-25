@@ -60,12 +60,13 @@ class Order {
     try {
       this.customer = new Customer(this.order, this.subiekt);
       this.getProducts();
-      if (!this.customer.customerGt) {
-        this.customer.add();
-      }
+      // if (!this.customer.customerGt) {
+      //   this.customer.add();
+      // }
       // this.create();
       // console.log('Zamówienie stworzono pomyślnie!!!'.green);
     } catch (err) {
+      console.log(err);
       console.log(`${err.message}`.red);
     }
   }
@@ -76,17 +77,22 @@ class Order {
       throw new Error('Zamówienie nie posiada produktów');
     }
     this.products = products.reduce((prev, product) => {
-      const orderItem = new OrderItem(product, this.subiekt);
-      return [...prev, ...orderItem.getProducts()];
+      const orderItem = new OrderItem({
+        name: product.name,
+        symbol: product.sku,
+        price: product.price_brutto,
+        quantity: product.quantity,
+      });
+      // return [...prev, ...orderItem.getProducts()];
     }, []);
 
-    this.productsPrice = Number(
-      this.products
-        .reduce((price, next) => price + next.getPrice() * next.getQuantity(), 0)
-        .toFixed(2),
-    );
+    // this.productsPrice = Number(
+    //   this.products
+    //     .reduce((price, next) => price + next.getPrice() * next.getQuantity(), 0)
+    //     .toFixed(2),
+    // );
 
-    console.log(`Zamówienie: produktów: ${this.products.length}`);
+    // console.log(`Zamówienie: produktów: ${this.products.length}`);
   }
 }
 

@@ -22,7 +22,7 @@ getOrders()
     // a.createZK();
     const len = orders.length;
 
-    [orders[1]].forEach((order, index) => {
+    [orders[0]].forEach((order, index) => {
       console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'.rainbow, `${index + 1}/${len}`);
       // console.log(order);
       const a = new Order(order, subiekt);

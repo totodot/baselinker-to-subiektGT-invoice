@@ -1,97 +1,46 @@
 const BigNumber = require('bignumber.js');
+const Logger = require('../utils/loggerUtil');
 const { reduceSku } = require('../utils/orderUtils');
 const Product = require('./Product');
+const Combo = require('./Combo');
 
 class OrderItem {
-  constructor(item, subiekt) {
-    this.item = item;
-    this.price = item.price_brutto;
+  constructor(item) {
+    this.name = item.name;
+    this.price = item.price;
     this.quantity = item.quantity;
-    this.subiekt = subiekt;
-    this.products = [];
+    this.symbol = item.symbol || '';
+    this.item = null;
     this.setProducts();
   }
 
-  getMnoznik() {
-    const cost = this.products
-      .map(productGt => [productGt.getPriceGt(), productGt.getQuantity()])
-      .reduce((prev, [price, quantity]) => prev + price * quantity, 0);
-
-    return this.price / cost;
-  }
-
-  getTotalPrice() {
-    return this.products.reduce((prev, next) => prev.plus(next.getCost()), new BigNumber(0));
-  }
-
-  normalize() {
-    let change = true;
-    while (change) {
-      change = false;
-      this.products.forEach((product) => {
-        const diff = new BigNumber(this.price).minus(this.getTotalPrice()).times(100);
-        console.log(diff.toNumber());
-        const absDiff = diff.abs().toNumber();
-        if (absDiff % product.getQuantity() === 0 && absDiff !== 0) {
-          product.setPrice(product.getPrice() + diff / product.getQuantity() / 100);
-          change = true;
-        }
-      });
-    }
-
-    change = true;
-    while (change) {
-      change = false;
-      this.products.forEach((product) => {
-        const diff = this.getTotalPrice()
-          .minus(this.price)
-          .times(100)
-          .toNumber();
-        const a = Math.floor(diff / product.quantity);
-        if (a !== 0) {
-          product.setPrice(product.getPrice() + a / 100);
-          change = true;
-        }
-      });
-    }
-  }
-
   setProducts() {
-    const { sku, name } = this.item;
-    if (sku === '') {
-      throw new Error(`Element zamówienia ${name}: nie posiada SKU!!!`);
+    const { symbol, name, price } = this;
+    if (symbol === '') {
+      throw new Error(Logger.translate('orderitemNoSymbol', { name }));
     }
-    const productsEntries = Object.entries(reduceSku(sku));
-    this.products = productsEntries.map(([SKU, QNT]) => new Product(SKU, QNT, this.subiekt));
+    const products = Object.entries(reduceSku(symbol));
 
-    if (this.products.length === 1) {
-      const product = this.products[0];
-      const quantity = product.quantity;
-      const price = this.price;
-      product.setPrice(price / quantity);
+    // this.products = productsEntries.map(([SKU, QNT]) => new Product(SKU, QNT, this.subiekt));
+
+    if (products.length === 1) {
+      const [productSymbol, productQuantity] = products[0];
+      this.item = new Product(productSymbol, productQuantity);
+      this.item.setPrice(price / productQuantity);
     } else {
-      const mnoznik = this.getMnoznik();
-      this.products.forEach((productGt) => {
-        productGt.setPrice(productGt.getPriceGt() * mnoznik);
-      });
-
-      if (this.products.length > 1) {
-        this.normalize();
-      }
-
-      this.updateQuantity();
+      this.item = new Combo(products, price);
     }
   }
 
-  getProducts() {
-    return this.products;
-  }
+  // getProducts() {
+  //   return this.products;
+  // }
 
-  updateQuantity() {
-    this.products.forEach((product) => {
-      product.quantity *= this.quantity;
-    });
-  }
+  // updateQuantity() {
+  //   this.products.forEach((product) => {
+  //     product.quantity *= this.quantity;
+  //   });
+  // }
 }
 
 module.exports = OrderItem;

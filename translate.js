@@ -5,4 +5,5 @@ module.exports = {
   customerCanNotAdd: 'Nie można dodać klienta dla tego obiektu, klient już istnieje!',
   customerCreate: 'Tworzenie klienta {email}',
   customerCreated: 'Stworzono klienta: {symbol}',
+  orderitemNoSymbol: 'Element zamówienia {name}: nie posiada symbolu!',
 };

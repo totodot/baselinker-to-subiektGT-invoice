@@ -1,40 +1,44 @@
-const BigNumber = require('bignumber.js');
+const GT = require('./SubiektGT');
 
 class Product {
-  constructor(sku, qnt, subiekt) {
-    this.subiekt = subiekt;
-    this.sku = sku;
-    this.price = new BigNumber(0);
-    this.quantity = qnt;
-    this.ProductGt = null;
+  constructor(symbol, quantity, price = 0) {
+    this.symbol = symbol;
+    this.price = price;
+    this.priceGt = null;
+    this.quantity = quantity;
+    this.productGt = null;
 
     this.checkExist();
   }
 
   checkExist() {
-    const { sku, name } = this;
-    if (!sku) {
-      throw new Error('Towar - nie posiada kodu SKU!!!');
+    const { symbol } = this;
+    if (!symbol) {
+      throw new Error('Towar - nie posiada kodu symbol!!!');
     }
-    if (this.subiekt.Towary.Istnieje(sku)) {
-      this.productGt = this.subiekt.Towary.Wczytaj(sku);
-      this.priceGt = new BigNumber(this.productGt.Ceny.Element(1).Brutto);
+    if (GT.instance.Towary.Istnieje(symbol)) {
+      this.productGt = GT.instance.Towary.Wczytaj(symbol);
+      this.priceGt = Number(this.productGt.Ceny.Element(1).Brutto);
       this.name = this.productGt.Nazwa;
     } else {
-      throw new Error(`Kod sku: ${sku} nie istnieje w systemie!!!`);
+      throw new Error(`Kod symbol: ${symbol} nie istnieje w systemie!!!`);
     }
   }
 
   getPriceGt() {
-    return this.priceGt.toNumber();
+    return this.priceGt;
   }
 
   setPrice(price) {
-    this.price = new BigNumber(price.toFixed(2));
+    this.price = Number(price.toFixed(2));
+  }
+
+  addPrice(price) {
+    this.price = Number((price + this.getPrice()).toFixed(2));
   }
 
   getPrice() {
-    return this.price.toNumber();
+    return this.price;
   }
 
   setQuantity(quantity) {
@@ -46,7 +50,7 @@ class Product {
   }
 
   getCost() {
-    return this.price.times(this.quantity).toNumber();
+    return Number((this.price * this.quantity).toFixed(2));
   }
 }
 
