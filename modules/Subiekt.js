@@ -1,5 +1,4 @@
 require('winax');
-const Logger = require('../utils/loggerUtil');
 
 class SubiektGT {
   constructor(config) {
@@ -25,14 +24,6 @@ class SubiektGT {
     } catch (err) {
       throw err;
     }
-  }
-
-  static customerGet(nip) {
-    if (SubiektGT.instance.Kontrahenci.Istnieje(nip)) {
-      Logger.info('customerExist', { nip });
-      return SubiektGT.instance.Kontrahenci.Wczytaj(nip);
-    }
-    return null;
   }
 }
 

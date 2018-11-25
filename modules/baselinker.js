@@ -1,9 +1,10 @@
-const post = require('../utils/fetch');
+const { POST } = require('../utils/fetchUtil');
+const Logger = require('../utils/loggerUtil');
 
 class BL {
   static async getOrders(params = {}) {
     try {
-      const { data } = await post('getOrders', params);
+      const { data } = await POST('getOrders', params);
       return data;
     } catch (err) {
       return err;
@@ -12,7 +13,7 @@ class BL {
 
   static async getOrderStatusList() {
     try {
-      const { data } = await post('getOrderStatusList');
+      const { data } = await POST('getOrderStatusList');
       return data;
     } catch (err) {
       throw err;
@@ -30,7 +31,9 @@ class BL {
       const { statuses } = await BL.getOrderStatusList();
       const status = statuses.find(({ name }) => name === statusToFind);
       if (!status) {
-        return new Error(`Cannot find status: ${statusToFind}`);
+        return new Error(
+          Logger.translate('Cannot find status: {status}', { status: statusToFind }),
+        );
       }
       const { orders } = await BL.getOrdersByStatus(status.id);
       return orders;

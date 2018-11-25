@@ -1,7 +1,7 @@
-const Logger = require('../utils/loggerUtil');
-const { reduceSku } = require('../utils/orderUtils');
 const Product = require('./Product');
 const Combo = require('./Combo');
+const Logger = require('../../utils/loggerUtil');
+const reduceSymbol = require('../../utils/orderUtil');
 
 class OrderItem {
   constructor(item) {
@@ -18,7 +18,7 @@ class OrderItem {
     if (symbol === '') {
       throw new Error(Logger.translate('orderitemNoSymbol', { name }));
     }
-    const products = Object.entries(reduceSku(symbol));
+    const products = Object.entries(reduceSymbol(symbol));
 
     if (products.length === 1) {
       const [productSymbol, productQuantity] = products[0];

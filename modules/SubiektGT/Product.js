@@ -1,5 +1,5 @@
-const GT = require('./SubiektGT');
-const Logger = require('../utils/loggerUtil');
+const GT = require('../Subiekt');
+const Logger = require('../../utils/loggerUtil');
 
 class Product {
   constructor(symbol, quantity, price = 0) {

@@ -4,7 +4,7 @@ const config = require('../config');
 
 const { baselinkerApi: api, baselinkerToken: token } = config;
 
-module.exports = (method, parameters = {}) => new Promise((resolve, reject) => {
+const POST = (method, parameters = {}) => new Promise((resolve, reject) => {
   const form = new FormData();
   form.append('token', token);
   form.append('method', method);
@@ -16,3 +16,7 @@ module.exports = (method, parameters = {}) => new Promise((resolve, reject) => {
     .then(resolve)
     .catch(reject);
 });
+
+module.exports = {
+  POST,
+};

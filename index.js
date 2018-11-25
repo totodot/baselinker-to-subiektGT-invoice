@@ -1,16 +1,18 @@
-const Order = require('./modules/Order');
 const { statusName, subiektGT: subiektGTConfig } = require('./config');
-const BL = require('./modules/baselinker');
-const SubiektGT = require('./modules/SubiektGT');
-const Customer = require('./modules/Customer');
+const Order = require('./modules/SubiektGT/Order');
+const BL = require('./modules/Baselinker');
+const SubiektGT = require('./modules/Subiekt');
+const mapping = require('./maps/baselinkerMap');
+const Logger = require('./utils/loggerUtil');
 
 const GT = new SubiektGT(subiektGTConfig);
-const subiekt = GT.connect();
+GT.connect();
 
 const getOrders = async () => {
   try {
     const orders = await BL.getOrderWhereStatus(statusName);
-    return orders;
+
+    return orders.map(order => mapping(order));
   } catch (err) {
     throw err;
   }
@@ -18,16 +20,12 @@ const getOrders = async () => {
 
 getOrders()
   .then((orders) => {
-    // const a = new Order(orders[1], subiekt);
-    // a.createZK();
     const len = orders.length;
-
-    [orders[0]].forEach((order, index) => {
-      console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>'.rainbow, `${index + 1}/${len}`);
-      // console.log(order);
-      const a = new Order(order, subiekt);
-      a.createZK(subiekt);
-      // console.log('\n');
+    orders.forEach((order, current) => {
+      Logger.info('orderStartElement', { current: current + 1, all: len });
+      const orderGt = new Order(order);
+      orderGt.createZK();
+      console.log('\n');
     });
   })
   .catch((err) => {

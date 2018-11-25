@@ -1,11 +1,10 @@
-const GT = require('./SubiektGT');
-const mapping = require('../mapping/baselinkerMap');
-const Logger = require('../utils/loggerUtil');
-const { nipIsValid, removeSeparator } = require('../utils/nipUtil');
+const GT = require('../Subiekt');
+const Logger = require('../../utils/loggerUtil');
+const { nipIsValid, removeSeparator } = require('../../utils/nipUtil');
 
 class Customer {
-  constructor(order) {
-    this.customer = mapping(order).customer;
+  constructor(customer) {
+    this.customer = customer;
     this.customerGt = null;
     this.nip = removeSeparator(this.customer.invoiceNip);
     this.isCompany = this.customer.invoiceCompany !== '' && this.nip !== '';
@@ -20,10 +19,10 @@ class Customer {
   setCustomerName(company, fullName) {
     if (this.isCompany) {
       if (company.length === 0) {
-        throw new Error(Logger('customerNoName'));
+        throw new Error(Logger.translate('customerNoName'));
       }
       if (!nipIsValid(this.nip)) {
-        throw new Error(Logger('customerInvalidNIP'));
+        throw new Error(Logger.translate('customerInvalidNIP'));
       }
       this.customerGt.NazwaPelna = `${company} ${fullName}`;
       this.customerGt.Nazwa = company.slice(0, 40);
@@ -32,7 +31,7 @@ class Customer {
       this.customerGt.Symbol = this.nip;
     } else {
       if (fullName.length === 0) {
-        throw new Error(Logger('customerNoName'));
+        throw new Error(Logger.translate('customerNoName'));
       }
       const [firstName, ...secondNames] = fullName.split(' ');
       this.customerGt.NazwaPelna = `${company} ${fullName}`.trim();
@@ -115,6 +114,23 @@ class Customer {
       }
       throw err;
     }
+  }
+
+  remove() {
+    const { email } = this.customer;
+    try {
+      if (this.customerGt) {
+        Logger.info('customerRemove', { email });
+        this.customerGt.Usun();
+        Logger.success('customerRemoved', { email });
+      }
+    } catch (err) {
+      Logger.error(err.message);
+    }
+  }
+
+  getId() {
+    return this.customerGt.Identyfikator;
   }
 }
 
