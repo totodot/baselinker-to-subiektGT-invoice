@@ -10,4 +10,5 @@ module.exports = {
     operator: 'operator',
     operatorPass: 'operatorpass',
   },
+  orderCategoryId: 90, // Sprzedaż internetowa
 };

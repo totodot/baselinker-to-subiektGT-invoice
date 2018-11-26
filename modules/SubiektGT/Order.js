@@ -1,6 +1,7 @@
 const GT = require('../Subiekt');
 const OrderItem = require('./OrderItem');
 const Customer = require('./Customer');
+const { orderCategoryId } = require('../../config');
 const Logger = require('../../utils/loggerUtil');
 
 class Order {
@@ -43,6 +44,7 @@ class Order {
       this.orderGt = GT.instance.SuDokumentyManager.DodajZK();
       this.orderGt.LiczonyOdCenBrutto = true;
       this.orderGt.KontrahentId = this.customer.getId();
+      this.orderGt.KategoriaId = orderCategoryId;
       this.products.forEach(product => this.addProduct(product));
       this.addTransport();
       this.orderGt.Zapisz();
