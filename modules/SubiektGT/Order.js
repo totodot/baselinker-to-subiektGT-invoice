@@ -30,6 +30,19 @@ class Order {
     return position;
   }
 
+  setComment() {
+    const {
+      orderId,
+      comments: { userComments, adminComments },
+    } = this.order;
+    const comment = `
+    ID zamówienia baselinker: ${orderId}
+    ${userComments ? `\r\nKomentarz użytkownika: ${userComments}` : ''}
+    ${adminComments ? `\r\nKomentarz admina: ${adminComments}` : ''}
+    `;
+    this.orderGt.Uwagi = comment;
+  }
+
   addTransport() {
     const position = this.orderGt.Pozycje.DodajUslugeJednorazowa();
     position.UslJednNazwa = 'Usługa logistyczna';
@@ -37,6 +50,23 @@ class Order {
     position.IloscJm = 1;
     position.Jm = 'szt.';
     return position;
+  }
+
+  setPayment() {
+    const { payment } = this.order;
+    if (payment === this.orderPrice) {
+      this.orderGt.PlatnoscPrzelewKwota = this.orderGt.KwotaDoZaplaty;
+      return;
+    }
+    if (payment === 0) {
+      this.orderGt.PlatnoscKredytKwota = this.orderGt.KwotaDoZaplaty;
+      const date = new Date();
+      date.setDate(date.getDate() + 8);
+      this.orderGt.PlatnoscKredytTermin = date;
+      return;
+    }
+
+    throw new Error(Logger.translate('orderInvalidPaymentAmmount'));
   }
 
   create() {
@@ -47,6 +77,8 @@ class Order {
       this.orderGt.KategoriaId = orderCategoryId;
       this.products.forEach(product => this.addProduct(product));
       this.addTransport();
+      this.setPayment();
+      this.setComment();
       this.orderGt.Zapisz();
     } catch (err) {
       if (err.description) {

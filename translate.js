@@ -15,4 +15,5 @@ module.exports = {
   orderNoProducts: 'Brak produktów w zamówieniu!',
   orderCreated: 'Zamówienie stworzone pomyślnie',
   statusNotExist: 'Cannot find status: {statusToFind}',
+  orderInvalidPaymentAmmount: 'Kwota zapłaty nie zgadza się z wartością zamówienia.',
 };
