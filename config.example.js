@@ -1,7 +1,8 @@
 module.exports = {
   baselinkerToken: 'baselinker token',
   baselinkerApi: 'baselinker api url',
-  statusName: 'status name to invoice',
+  fvStatusName: 'status name to invoice',
+  packingStatusName: 'status to packing packages',
   subiektGT: {
     user: 'sa',
     pass: '',
@@ -11,4 +12,5 @@ module.exports = {
     operatorPass: 'operatorpass',
   },
   orderCategoryId: 90, // Sprzedaż internetowa
+  customerCaregoryId: 3, // Internet
 };

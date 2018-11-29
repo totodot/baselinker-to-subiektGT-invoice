@@ -1,6 +1,7 @@
 const GT = require('../Subiekt');
+const { customerCaregoryId } = require('../../config');
 const Logger = require('../../utils/loggerUtil');
-const { nipIsValid, removeSeparator } = require('../../utils/nipUtil');
+const { nipIsValid, removeSeparator, getNipVariants } = require('../../utils/nipUtil');
 
 class Customer {
   constructor(customer) {
@@ -9,12 +10,10 @@ class Customer {
     this.nip = removeSeparator(this.customer.invoiceNip);
     this.isCompany = this.customer.invoiceCompany !== '' && this.nip !== '';
 
-    if (this.isCompany) {
+    if (this.isCompany && nipIsValid(this.nip)) {
       this.customerGt = this.checkExist();
     }
   }
-
-  // Set Subiekt GT object
 
   setCustomerName(company, fullName) {
     if (this.isCompany) {
@@ -82,17 +81,22 @@ class Customer {
     this.setCustomerAddress(invoiceAddress, invoiceCity, invoicePostcode);
     this.setCustomerContact(email, phone);
 
-    // TODO add to config
-    this.customerGt.GrupaId = 3;
+    if (customerCaregoryId !== undefined) {
+      this.customerGt.GrupaId = customerCaregoryId;
+    }
 
     return true;
   }
 
   checkExist() {
-    if (GT.instance.Kontrahenci.Istnieje(this.nip)) {
-      Logger.info('customerExist', { nip: this.nip });
-      return GT.instance.Kontrahenci.Wczytaj(this.nip);
+    const nips = getNipVariants(this.nip);
+    for (let i = 0; i < nips.length; i += 1) {
+      if (GT.instance.Kontrahenci.Istnieje(nips[i])) {
+        Logger.info('customerExist', { nip: nips[i] });
+        return GT.instance.Kontrahenci.Wczytaj(nips[i]);
+      }
     }
+
     return null;
   }
 

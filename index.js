@@ -1,4 +1,4 @@
-const { statusName, subiektGT: subiektGTConfig } = require('./config');
+const { zkStatusName, packingStatusName, subiektGT: subiektGTConfig } = require('./config');
 const Order = require('./modules/SubiektGT/Order');
 const BL = require('./modules/Baselinker');
 const SubiektGT = require('./modules/Subiekt');
@@ -8,23 +8,29 @@ const Logger = require('./utils/loggerUtil');
 const GT = new SubiektGT(subiektGTConfig);
 GT.connect();
 
-const getOrders = async () => {
+const getBaselinkerData = async () => {
   try {
-    const orders = await BL.getOrderWhereStatus(statusName);
-
-    return orders.map(order => mapping(order));
+    const [zkStatus, packingStatus] = await BL.checkStatusesExists(zkStatusName, packingStatusName);
+    const orders = await BL.getOrderWhereStatus(zkStatus.id);
+    return {
+      orders: orders.map(order => mapping(order)),
+      packingStatus,
+    };
   } catch (err) {
-    throw err;
+    console.log(err);
   }
 };
 
-getOrders()
-  .then((orders) => {
+getBaselinkerData()
+  .then(({ orders, packingStatus }) => {
     const len = orders.length;
     orders.forEach((order, current) => {
       Logger.info('orderStartElement', { current: current + 1, all: len });
       const orderGt = new Order(order);
-      orderGt.createZK();
+      const created = orderGt.createZK();
+      if (created) {
+        orderGt.updateBLdata(packingStatus.id);
+      }
       console.log('\n');
     });
   })

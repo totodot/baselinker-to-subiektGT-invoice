@@ -2,6 +2,7 @@ const GT = require('../Subiekt');
 const OrderItem = require('./OrderItem');
 const Customer = require('./Customer');
 const { orderCategoryId } = require('../../config');
+const BL = require('../Baselinker');
 const Logger = require('../../utils/loggerUtil');
 
 class Order {
@@ -33,13 +34,11 @@ class Order {
   setComment() {
     const {
       orderId,
-      comments: { userComments, adminComments },
+      comments: { userComments },
     } = this.order;
     const comment = `
     ID zamówienia baselinker: ${orderId}
-    ${userComments ? `\r\nKomentarz użytkownika: ${userComments}` : ''}
-    ${adminComments ? `\r\nKomentarz admina: ${adminComments}` : ''}
-    `;
+    ${userComments ? `\r\nKomentarz użytkownika: ${userComments}` : ''}`;
     this.orderGt.Uwagi = comment;
   }
 
@@ -69,12 +68,27 @@ class Order {
     throw new Error(Logger.translate('orderInvalidPaymentAmmount'));
   }
 
+  updateBLdata(packingStatusId) {
+    const { orderId } = this.order;
+    try {
+      BL.setOrderAdminComments(
+        orderId,
+        `${this.order.comments.adminComments || ''}\r\n${this.orderGt.NumerPelny}`,
+      );
+      BL.setOrderStatus(orderId, packingStatusId);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   create() {
     try {
       this.orderGt = GT.instance.SuDokumentyManager.DodajZK();
       this.orderGt.LiczonyOdCenBrutto = true;
       this.orderGt.KontrahentId = this.customer.getId();
-      this.orderGt.KategoriaId = orderCategoryId;
+      if (orderCategoryId !== undefined) {
+        this.orderGt.KategoriaId = orderCategoryId;
+      }
       this.products.forEach(product => this.addProduct(product));
       this.addTransport();
       this.setPayment();
@@ -98,10 +112,11 @@ class Order {
       }
       this.create();
       Logger.success('orderCreated');
+      return true;
     } catch (err) {
       Logger.error(err.message);
-      console.log(err);
       this.clear();
+      return false;
     }
   }
 

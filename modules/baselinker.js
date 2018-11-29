@@ -14,7 +14,26 @@ class BL {
   static async getOrderStatusList() {
     try {
       const { data } = await POST('getOrderStatusList');
-      return data;
+      return data.statuses;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async checkStatusesExists(zkStatus, packageStatus) {
+    try {
+      const data = await BL.getOrderStatusList();
+      const ZKS = data.find(({ name }) => name === zkStatus);
+      if (!ZKS) {
+        return new Error(Logger.translate('Cannot find status: {status}', { status: zkStatus }));
+      }
+      const PS = data.find(({ name }) => name === packageStatus);
+      if (!PS) {
+        return new Error(
+          Logger.translate('Cannot find status: {status}', { status: packageStatus }),
+        );
+      }
+      return [ZKS, PS];
     } catch (err) {
       throw err;
     }
@@ -26,17 +45,34 @@ class BL {
     });
   }
 
-  static async getOrderWhereStatus(statusToFind) {
+  static async getOrderWhereStatus(statusId) {
     try {
-      const { statuses } = await BL.getOrderStatusList();
-      const status = statuses.find(({ name }) => name === statusToFind);
-      if (!status) {
-        return new Error(
-          Logger.translate('Cannot find status: {status}', { status: statusToFind }),
-        );
-      }
-      const { orders } = await BL.getOrdersByStatus(status.id);
+      const { orders } = await BL.getOrdersByStatus(statusId);
       return orders;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async setOrderAdminComments(orderId, comment) {
+    try {
+      const { data } = await POST('setOrderFields', {
+        order_id: orderId,
+        admin_comments: comment,
+      });
+      return data;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async setOrderStatus(orderId, statusId) {
+    try {
+      const { data } = await POST('setOrderStatus', {
+        order_id: orderId,
+        status_id: statusId,
+      });
+      return data;
     } catch (err) {
       throw err;
     }
