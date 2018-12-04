@@ -77,6 +77,18 @@ class BL {
       throw err;
     }
   }
+
+  static async getProductsData(storageId, products) {
+    try {
+      const { data } = await POST('getProductsData', {
+        storage_id: storageId,
+        products,
+      });
+      return data.products;
+    } catch (err) {
+      throw err;
+    }
+  }
 }
 
 module.exports = BL;
