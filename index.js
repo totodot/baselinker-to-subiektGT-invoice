@@ -28,23 +28,27 @@ const getNoSkuIds = products => products.reduce((prev, { product_id, sku }) => {
 
 const getFullData = async (orders) => {
   const noSkuIds = orders.reduce((prev, { products }) => [...prev, ...getNoSkuIds(products)], []);
+  if (noSkuIds.length === 0) {
+    return orders;
+  }
   const products = await BL.getProductsData(1, noSkuIds);
   const productsSkus = Object.keys(products).reduce(
     (prev, id) => ({
       ...prev,
-      [id]: findSkuInfeatures(products[id].features) || null,
+      [id]: findSkuInfeatures(products[id].features) || '',
     }),
     {},
   );
-  orders.forEach(({ products }) => {
-    products.forEach((product) => {
+  return orders.map(order => ({
+    ...order,
+    products: order.products.map((product) => {
       const { sku, product_id } = product;
-      if (!sku) {
-        product.sku = productsSkus[product_id] || '';
-      }
-    });
-  });
-  return orders;
+      return {
+        ...product,
+        sku: sku || productsSkus[product_id],
+      };
+    }),
+  }));
 };
 
 const getBaselinkerData = async () => {
