@@ -16,4 +16,6 @@ module.exports = {
   orderCreated: 'Zamówienie stworzone pomyślnie',
   statusNotExist: 'Cannot find status: {statusToFind}',
   orderInvalidPaymentAmmount: 'Kwota zapłaty nie zgadza się z wartością zamówienia.',
+  findOrders: 'Znaleziono {length} zamówień.',
+  orderStatus: 'Wszystkie / Sukces / Błąd',
 };

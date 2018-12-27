@@ -1,3 +1,4 @@
+require('colors');
 const { zkStatusName, packingStatusName, subiektGT: subiektGTConfig } = require('./config');
 const Order = require('./modules/SubiektGT/Order');
 const BL = require('./modules/Baselinker');
@@ -6,12 +7,11 @@ const mapping = require('./maps/baselinkerMap');
 const Logger = require('./utils/loggerUtil');
 
 const GT = new SubiektGT(subiektGTConfig);
-GT.connect();
 
 const findSkuInfeatures = (features) => {
   let SKU = null;
   features.forEach(([key, value]) => {
-    if (key === 'sku') {
+    if (key === 'sku' || key === 'SKU') {
       SKU = value;
     }
   });
@@ -65,18 +65,30 @@ const getBaselinkerData = async () => {
   }
 };
 
+try {
+  console.log('Połączenie do SUBIEKT GT');
+  GT.connect();
+} catch (e) {
+  console.log('Błąd połączenia do SUBIEKT GT');
+  console.log(e);
+}
 getBaselinkerData()
   .then(({ orders, packingStatus }) => {
     const len = orders.length;
+    let success = 0;
+    Logger.info('findOrders', { length: len });
     orders.forEach((order, current) => {
       Logger.info('orderStartElement', { current: current + 1, all: len });
       const orderGt = new Order(order);
       const created = orderGt.createZK();
       if (created) {
         orderGt.updateBLdata(packingStatus.id);
+        success++;
       }
       console.log('\n');
     });
+    Logger.info('orderStatus');
+    console.log(`${`${len}`.blue} / ${`${success}`.green} / ${`${len - success}`.red}`);
   })
   .catch((err) => {
     console.log(err);

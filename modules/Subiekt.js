@@ -22,6 +22,7 @@ class SubiektGT {
       SubiektGT.instance = instance;
       return instance;
     } catch (err) {
+      console.log('err', err);
       throw err;
     }
   }
