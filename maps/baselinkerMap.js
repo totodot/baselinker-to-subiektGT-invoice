@@ -2,6 +2,8 @@ module.exports = ({
   order_id: orderId,
   user_comments: userComments,
   admin_comments: adminComments,
+  delivery_method: deliveryMethod,
+  delivery_point_name: deliveryPointName,
   delivery_price: deliveryPrice,
   email,
   invoice_address: invoiceAddress,
@@ -19,6 +21,8 @@ module.exports = ({
 }) => ({
   orderId,
   deliveryPrice,
+  deliveryMethod,
+  deliveryPointName,
   payment,
   comments: {
     userComments,

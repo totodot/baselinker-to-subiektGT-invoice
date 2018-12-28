@@ -4,6 +4,7 @@ const Customer = require('./Customer');
 const { orderCategoryId } = require('../../config');
 const BL = require('../Baselinker');
 const Logger = require('../../utils/loggerUtil');
+const { getDeliveryName } = require('../../utils/orderUtil');
 
 class Order {
   constructor(order) {
@@ -35,16 +36,18 @@ class Order {
     const {
       orderId,
       comments: { userComments },
+      deliveryPointName,
     } = this.order;
-    const comment = `
-    ID zamówienia baselinker: ${orderId}
-    ${userComments ? `\r\nKomentarz użytkownika: ${userComments}` : ''}`;
+    const comment = `ID zamówienia baselinker: ${orderId}
+    ${userComments ? `\r\nKomentarz użytkownika: ${userComments}` : ''}
+    ${deliveryPointName ? `\r\n${deliveryPointName}` : ''}`;
     this.orderGt.Uwagi = comment;
   }
 
   addTransport() {
+    const { deliveryMethod } = this.order;
     const position = this.orderGt.Pozycje.DodajUslugeJednorazowa();
-    position.UslJednNazwa = 'Usługa logistyczna';
+    position.UslJednNazwa = getDeliveryName(deliveryMethod);
     position.WartoscBruttoPoRabacie = Number((this.orderPrice - this.productsPrice).toFixed(2));
     position.IloscJm = 1;
     position.Jm = 'szt.';
@@ -95,6 +98,7 @@ class Order {
       this.setComment();
       this.orderGt.Zapisz();
     } catch (err) {
+      console.log(err);
       if (err.description) {
         throw new Error(`SUBIEKT_GT_ERROR_: ${err.description}`);
       }

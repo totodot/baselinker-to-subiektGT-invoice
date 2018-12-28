@@ -28,6 +28,8 @@ class Customer {
       this.customerGt.Osoba = 0;
       this.customerGt.NIP = this.nip;
       this.customerGt.Symbol = this.nip;
+      this.customerGt.CzynnyPodatnikVAT = true;
+      this.customerGt.OdbiorcaDetaliczny = false;
     } else {
       if (fullName.length === 0) {
         throw new Error(Logger.translate('customerNoName'));
@@ -37,6 +39,8 @@ class Customer {
       this.customerGt.Osoba = 1;
       this.customerGt.OsobaImie = firstName;
       this.customerGt.OsobaNazwisko = secondNames.join(' ');
+      this.customerGt.CzynnyPodatnikVAT = false;
+      this.customerGt.OdbiorcaDetaliczny = true;
     }
   }
 

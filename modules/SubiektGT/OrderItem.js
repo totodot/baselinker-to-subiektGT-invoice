@@ -1,7 +1,7 @@
 const Product = require('./Product');
 const Combo = require('./Combo');
 const Logger = require('../../utils/loggerUtil');
-const reduceSymbol = require('../../utils/orderUtil');
+const { reduceSymbol } = require('../../utils/orderUtil');
 
 class OrderItem {
   constructor(item) {

@@ -33,4 +33,27 @@ const reduceSymbol = (sku) => {
   }, {});
 };
 
-module.exports = reduceSymbol;
+const KurierReg = new RegExp('(kurier|kurierska)');
+const PaczkomatyReg = new RegExp('(paczkomaty|paczkomat)');
+const PobranieReg = new RegExp('(pobranie|pobraniowa|pobraniowo)');
+const AllegroRex = new RegExp('allegro');
+
+const getDeliveryName = (name) => {
+  const lowerCased = name.toLocaleLowerCase();
+  const isKurier = KurierReg.test(lowerCased);
+  const isPaczkomat = PaczkomatyReg.test(lowerCased);
+  const isAllegro = AllegroRex.test(lowerCased);
+  const isPobranie = PobranieReg.test(lowerCased);
+  const newName = [
+    isKurier ? 'Kurier' : null,
+    isPaczkomat ? 'Paczkomaty' : null,
+    isAllegro ? 'Allegro' : null,
+    isPobranie ? 'Pobranie' : null,
+  ]
+    .filter(word => word)
+    .join(' ');
+
+  return newName || 'Usługa Logistyczna';
+};
+
+module.exports = { reduceSymbol, getDeliveryName };
