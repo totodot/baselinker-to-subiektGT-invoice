@@ -25,10 +25,10 @@ const postProduct = async (data) => {
 };
 
 const createProduct = async ({
-  name, sku, price, qty,
+  name, sku, price, qty, ean,
 }) => {
   try {
-    const result = await postProduct({
+    const data = {
       name,
       sku,
       price,
@@ -48,7 +48,15 @@ const createProduct = async ({
           is_in_stock: qty !== 0,
         },
       },
-    });
+      custom_attributes: [
+        {
+          attribute_code: 'ean',
+          value: ean,
+        },
+      ],
+    };
+    const result = await axios.post('/products', { product: data });
+    console.log(`Product created ${sku}`);
     return result;
   } catch (err) {
     throw err;
@@ -56,10 +64,10 @@ const createProduct = async ({
 };
 
 const updateProduct = async ({
-  name, sku, price, qty,
+  name, sku, price, qty, ean,
 }) => {
   try {
-    const result = await postProduct({
+    const data = {
       name,
       sku,
       price,
@@ -69,7 +77,15 @@ const updateProduct = async ({
           is_in_stock: qty !== 0,
         },
       },
-    });
+      custom_attributes: [
+        {
+          attribute_code: 'ean',
+          value: ean,
+        },
+      ],
+    };
+    const result = await axios.put(`/products/${encodeURIComponent(sku)}`, { product: data });
+    console.log(`Product updated ${sku}`);
     return result;
   } catch (err) {
     throw err;
@@ -81,6 +97,12 @@ const needUpdate = (product, data) => {
     return true;
   }
   if (Number(product.qty) !== Number(data.extension_attributes.stock_item.qty)) {
+    return true;
+  }
+  const eanAttribute = data.custom_attributes.find(
+    ({ attribute_code }) => attribute_code === 'ean',
+  );
+  if (!eanAttribute || (eanAttribute && Number(eanAttribute.value) !== Number(product.ean))) {
     return true;
   }
 
