@@ -8,7 +8,7 @@ axios.defaults.headers.common = { Authorization: `bearer ${token}` };
 
 const getProduct = async (sku) => {
   try {
-    const result = await axios.get(`/products/${sku}`);
+    const result = await axios.get(`/products/${encodeURIComponent(sku)}`);
     return result.data;
   } catch (err) {
     throw err;
@@ -105,7 +105,6 @@ const run = async (products) => {
       data = await getProduct(product.sku);
     } catch (err) {
       if (err.response.status === 404) {
-        console.log(err);
         console.log('Not item found');
       } else {
         console.log(err);
@@ -129,11 +128,27 @@ const run = async (products) => {
 
     if (!data) {
       items.toCreate++;
+
+      const create = async (data) => {
+        try {
+          await createProduct(data);
+          items.created++;
+        } catch (err) {
+          if (err.response.data.message === 'Klucz URL dla wybranego sklepu już istnieje.') {
+            create({
+              ...data,
+              name: `${data.name} new`,
+            });
+          } else {
+            throw err;
+          }
+        }
+      };
+
       try {
-        await createProduct(product);
-        items.created++;
+        await create(product);
       } catch (err) {
-        console.log('Cannot create product');
+        console.log(`Cannot create product ${product.name} | ${product.sku}`);
       }
     }
   }
