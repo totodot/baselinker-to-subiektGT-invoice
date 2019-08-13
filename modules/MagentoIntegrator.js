@@ -3,7 +3,7 @@ const {
   magento: { token, attribute_set_id, category_id },
 } = require('../config');
 
-axios.defaults.baseURL = 'http://store.swiecisie.pl/rest/V1';
+axios.defaults.baseURL = 'http://store.swiecisie.pl/rest/all/V1';
 axios.defaults.headers.common = { Authorization: `bearer ${token}` };
 
 const getProduct = async (sku) => {
