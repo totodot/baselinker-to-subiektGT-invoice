@@ -12,5 +12,10 @@ module.exports = {
     operatorPass: 'operatorpass',
   },
   orderCategoryId: 90, // Sprzedaż internetowa
-  customerCaregoryId: 3, // Internet
+  customerCaregoryId: 3, // Internet,
+  magento: {
+    token: 'token',
+    attribute_set_id: 4,
+    category_id: 42,
+  },
 };

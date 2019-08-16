@@ -11,7 +11,7 @@ class SubiektGT {
       const {
         user, pass, server, dbName, operator, operatorPass,
       } = this.config;
-      const gt = new ActiveXObject('InsERT.GT');
+      const gt = new ActiveXObject('InsERT.gt');
       gt.Uzytkownik = user;
       gt.UzytkownikHaslo = pass;
       gt.Serwer = server;
