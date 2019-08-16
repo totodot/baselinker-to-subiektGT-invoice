@@ -102,7 +102,7 @@ const needUpdate = (product, data) => {
   const eanAttribute = data.custom_attributes.find(
     ({ attribute_code }) => attribute_code === 'ean',
   );
-  if (!eanAttribute || (eanAttribute && Number(eanAttribute.value) !== Number(product.ean))) {
+  if ((!eanAttribute && product.ean) || (eanAttribute && Number(eanAttribute.value) !== Number(product.ean))) {
     return true;
   }
 
